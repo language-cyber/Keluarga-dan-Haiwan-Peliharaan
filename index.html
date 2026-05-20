@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ms" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Mendengar IGCSE (40 Marks)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body{background:#f8fafc;font-family:sans-serif; transition: filter 0.3s ease;}
+        .no-select { -webkit-user-select: none; user-select: none; }
+        @media print { html, body { display: none !important; } }
+        .blurred-security { filter: blur(25px) grayscale(100%) !important; pointer-events: none !important; opacity: 0.2 !important; }
+        .opt-btn{width:100%;text-align:left;padding:1rem;border:2px solid #e2e8f0;border-radius:1rem;margin-bottom:0.75rem;transition:all 0.2s;font-weight:600;display:flex;align-items:center;background:white;cursor:pointer;}
+        .opt-btn:hover{border-color:#cbd5e1;background:#f1f5f9;}
+        .correct-answer{background-color:#10b981!important;color:white;border-color:#059669!important;}
+        .wrong-answer{background-color:#ef4444!important;color:white;border-color:#b91c1c!important;}
+        .dimmed-answer{opacity:0.4; filter:grayscale(100%);}
+        .selected{border-color:#3b82f6;background-color:#eff6ff;}
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .line-through-red { text-decoration: line-through; color: #9f1239; }
+        #welcome-modal { transition: opacity 0.3s ease; }
+    </style>
+</head>
+<body class="py-10 px-4 min-h-screen pt-24 pb-10 flex flex-col items-center no-select" id="app-body">
+    <div id="welcome-modal" class="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl transform scale-100 transition-transform">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-black text-indigo-900 uppercase italic">Pendaftaran Pelajar</h2>
+                <p class="text-sm text-slate-500 font-medium mt-2">Sila lengkapkan butiran di bawah sebelum memulakan ujian.</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-indigo-600 mb-1">Nama Penuh</label>
+                    <input type="text" id="student-name" placeholder="Contoh: Ahmad Albab" class="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-slate-800 transition-colors" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-indigo-600 mb-1">Pilih Guru Anda</label>
+                    <select id="student-teacher" class="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-slate-800 transition-colors bg-white">
+                        <option value="" disabled selected>Pilih Guru...</option>
+                        <option value="Satina">Cikgu Satina</option>
+                        <option value="Shahrizan">Cikgu Shahrizan</option>
+                        <option value="Aziana">Cikgu Aziana</option>
+                        <option value="Farra">Cikgu Farra</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-indigo-600 mb-1">Tahun (Year)</label>
+                        <select id="student-year" class="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-slate-800 transition-colors bg-white">
+                            <option value="" disabled selected>Pilih...</option>
+                            <option value="7">Year 7</option>
+                            <option value="8">Year 8</option>
+                            <option value="9">Year 9</option>
+                            <option value="10">Year 10</option>
+                            <option value="11">Year 11</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-indigo-600 mb-1">Tahap Kelas</label>
+                        <select id="student-level" class="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-indigo-500 outline-none font-bold text-slate-800 transition-colors bg-white">
+                            <option value="" disabled selected>Pilih...</option>
+                            <option value="Advanced">Advanced</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Foundation">Foundation</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="startQuiz()" class="w-full py-4 mt-2 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest shadow-lg hover:bg-indigo-700 hover:scale-[1.02] transition-all">Mula Ujian Sekarang</button>
+            </div>
+        </div>
+    </div>
+    <div class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md border-b shadow-sm z-50 py-3 px-4 sm:px-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-xs sm:text-sm font-black text-indigo-900 uppercase italic leading-none">Latihan Mendengar IGCSE (40 Marks)</h1>
+            <p class="text-[8px] font-bold text-slate-400 mt-1 uppercase"><span id="display-student-name">Pelajar</span> | </p>
+        </div>
+        <div class="text-lg sm:text-xl font-black text-indigo-600 leading-none bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 flex items-center gap-2">
+            <button onclick="refreshPage()" class="text-[9px] bg-white text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200 px-2 py-1 rounded-lg uppercase tracking-wider font-bold transition-colors shadow-sm cursor-pointer">Refresh ↻</button>
+            <button onclick="logoutUser()" class="text-[9px] bg-rose-100 text-rose-600 hover:bg-rose-500 hover:text-white px-2 py-1 rounded-lg uppercase tracking-wider font-bold transition-colors shadow-sm cursor-pointer">Log Keluar</button>
+            <span id="offline-indicator" class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" title="Auto-Save Aktif"></span>
+            <span>Skor: <span id="score-display">-</span> / <span id="total-display">0</span></span>
+        </div>
+    </div>
+    <div id="main-content" class="max-w-3xl mx-auto w-full mt-4 hidden">
+        <div id="tabs" class="flex overflow-x-auto gap-2 mb-4 pb-2 hide-scrollbar px-1"></div>
+        <div id="box" class="bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 mb-8"></div>
+    </div>
+    <div id="submitting-overlay" class="fixed inset-0 z-[200] bg-white/80 backdrop-blur-sm flex-col items-center justify-center hidden">
+        <div class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+        <h3 class="text-lg font-black text-indigo-900 uppercase">Menghantar Jawapan...</h3>
+        <p class="text-xs font-bold text-slate-500 mt-1">Sila tunggu sebentar.</p>
+    </div>
+    <script>
+
+const sections = [{"id":1,"title":"Bhg 1 (S1-8)","type":"objective","situation":"Adik perempuan saya bertanggungjawab memberi makan kucing peliharaannya setiap pagi.","questions":[{"id":1,"text":"Apakah tanggungjawab utama adik perempuan itu setiap pagi?","options":{"A":"Membangunkan kucingnya.","B":"Memberi makan kucingnya.","C":"Membersihkan bilik kucingnya.","D":"Bermain dengan kucingnya."},"correct":"B","evidence":"F1 (Adik): \"Saya beri dia makan, Abang. Itu tanggungjawab utama saya.\""},{"id":2,"text":"Bilakah adik perempuan itu biasanya mula memberi makan kucingnya?","options":{"A":"Sebelum pukul 6:00 pagi.","B":" seawal pukul 6:00 pagi.","C":"Selepas sarapan sendiri.","D":"Selepas solat subuh."},"correct":"B","evidence":"F1 (Adik): \"Biasanya saya bangun seawal 6:00 pagi.\""},{"id":3,"text":"Apakah ciri-ciri kucing peliharaan adik perempuan itu?","options":{"A":"Berbulu nipis dan berwarna hitam.","B":"Baka kampung dengan bulu tebal.","C":"Baka Parsi campur, berbulu tebal dan berwarna coklat cair serta putih.","D":"Kucing Siam yang aktif dan manja."},"correct":"C","evidence":"F1 (Adik): \"Luna kucing baka Parsi campur, Abang. Sebab itu bulu dia tebal. Warnanya campuran coklat cair dan putih.\""},{"id":4,"text":"Bagaimanakah tindak balas Luna apabila adik perempuan itu datang untuk memberinya makan?","options":{"A":"Dia akan bersembunyi di bawah meja.","B":"Dia akan tidur dan tidak menunjukkan reaksi.","C":"Dia akan berlari, menggesel badan dan mendengkur kuat.","D":"Dia akan mengiau dengan marah dan menjauhi adik."},"correct":"C","evidence":"F1 (Adik): \"Dia akan berlari, menggesel badan di kaki sambil mendengkur kuat. Kadang melonjak-lonjak.\""},{"id":5,"text":"Apakah cabaran yang dihadapi oleh adik perempuan itu dalam memberi makan Luna?","options":{"A":"Luna tidak mahu makan makanan yang sama setiap hari.","B":"Mangkuk makanan Luna sering kotor dan perlu dicuci.","C":"Luna selalu merajuk dan enggan makan.","D":"Kucing itu terlalu cerewet memilih jenis makanan."},"correct":"B","evidence":"F1 (Adik): \"Cabarannya ialah memastikan mangkuk makanannya sentiasa bersih. Luna cerewet, kalau kotor dia tak berapa nak makan.\""},{"id":6,"text":"Apakah perasaan adik perempuan itu terhadap tanggungjawabnya menjaga Luna?","options":{"A":"Rasa terbeban dan penat.","B":"Rasa biasa-biasa sahaja dan tiada apa-apa.","C":"Rasa gembira, bangga dan puas.","D":"Rasa bimbang dan risau akan masa depan Luna."},"correct":"C","evidence":"F1 (Adik): \"Saya rasa sangat gembira dan bangga, Abang. Rasa puas dapat jaga Luna.\""},{"id":7,"text":"Apakah jenis makanan utama yang diberikan kepada Luna setiap pagi?","options":{"A":"Makanan basah berperisa ayam.","B":"Makanan kering jenama Royal Canin.","C":"Ikan rebus dan nasi.","D":"Makanan yang disediakan oleh ibu."},"correct":"B","evidence":"F1 (Adik): \"Saya beri dia makanan kering khusus untuk kucing dewasa, jenama Royal Canin.\""},{"id":8,"text":"Apakah keputusan adik perempuan itu mengenai tanggungjawabnya terhadap Luna pada masa akan datang?","options":{"A":"Dia akan cuba berhenti menjaganya jika penat.","B":"Dia akan mencari orang lain untuk mengambil alih tugas.","C":"Dia akan terus menjaga Luna selagi mampu.","D":"Dia hanya akan menjaga Luna sehingga tamat sekolah."},"correct":"C","evidence":"F1 (Adik): \"Tentu sekali, Abang. Selagi saya mampu, saya akan terus menjaga Luna. Ini tanggungjawab seumur hidup.\""}]},{"id":2,"title":"Bhg 2 (S9-14)","type":"objective","situation":"Anjing kesayangan keluarga itu sentiasa menemani mereka bersiar-siar di taman pada hujung minggu.","questions":[{"id":9,"text":"Mengapakah keluarga Puan Maria gemar membawa Snowy bersiar-siar di taman pada hujung minggu?","options":{"A":"Snowy memerlukan senaman dan interaksi sosial.","B":"Snowy boleh bertemu dengan kawan-kawan baharu.","C":"Mereka ingin menunjukkan baka Snowy yang istimewa.","D":"Mereka tiada aktiviti lain pada hujung minggu."},"correct":"A","evidence":"Ini cara Snowy mendapat senaman yang cukup dan berinteraksi."},{"id":10,"text":"Bagaimanakah perwatakan utama Snowy apabila berada di taman?","options":{"A":"Dia pemalu dan tidak suka bergaul.","B":"Dia agresif dan suka menyalak.","C":"Dia aktif, riang, penyayang dan mudah mesra.","D":"Dia bertenang dan gemar memerhati sahaja."},"correct":"C","evidence":"Oh, Snowy sangat aktif dan riang! Dia penyayang dan setia kepada keluarga kami... Dia suka perhatian, mudah mesra dengan orang dan anjing lain, serta jarang agresif atau takut."},{"id":11,"text":"Antara berikut, yang manakah faedah utama yang dirasai oleh keluarga Puan Maria dengan kehadiran Snowy?","options":{"A":"Memastikan rumah sentiasa dijaga rapi.","B":"Mengurangkan bilangan ahli keluarga.","C":"Mengajar anak-anak tentang tanggungjawab dan mengeratkan hubungan kekeluargaan.","D":"Membolehkan mereka memenangi pertandingan anjing."},"correct":"C","evidence":"Kehadirannya mengajar anak-anak tentang tanggungjawab dan kasih sayang... Ini juga mendorong kami sekeluarga lebih aktif, mengurangkan stres dan mengeratkan hubungan kekeluargaan."},{"id":12,"text":"Apakah salah satu tanggungjawab utama yang perlu dipikul dalam menjaga Snowy?","options":{"A":"Membelikannya banyak mainan mewah.","B":"Memastikan dia tidur di dalam bilik khas.","C":"Membawa ke klinik veterinar untuk pemeriksaan berkala dan menjaga kebersihan.","D":"Mengajar Snowy bercakap dan menyanyi."},"correct":"C","evidence":"Kami juga perlu membawa Snowy ke klinik veterinar untuk pemeriksaan berkala dan vaksinasi. Penjagaan kebersihan seperti memandikan dan menyikat bulunya juga sangat penting."},{"id":13,"text":"Apakah cabaran yang pernah dihadapi Puan Maria berkaitan Snowy di taman?","options":{"A":"Snowy bergaduh dengan anjing lain.","B":"Snowy tersesat mengejar tupai dan berguling dalam lumpur.","C":"Snowy merosakkan tanaman di taman.","D":"Snowy tidak mahu pulang ke rumah."},"correct":"B","evidence":"Ada satu ketika, Snowy terlepas tali mengejar tupai sehingga hampir tersesat... Cabaran lain apabila dia berguling dalam lumpur selepas hujan, memerlukan sesi mandi yang panjang."},{"id":14,"text":"Apakah nasihat utama Puan Maria kepada mereka yang berhasrat untuk memiliki haiwan peliharaan?","options":{"A":"Pastikan anda mempunyai banyak masa lapang sahaja.","B":"Sedialah dengan komitmen masa, tenaga, dan kewangan yang mencukupi.","C":"Beli haiwan peliharaan yang mahal dan jarang ditemui.","D":"Abaikan kos penjagaan kerana kasih sayang lebih utama."},"correct":"B","evidence":"bersedialah dengan komitmen masa, tenaga, dan kewangan. Pastikan anda mempunyai sumber yang cukup untuk penjagaan kesihatan, makanan, dan tempat tinggal yang sesuai."}]},{"id":3,"title":"Bhg 3 (S15-19)","type":"objective","situation":"Kehadiran arnab peliharaan telah mengeratkan hubungan kekeluargaan kami melalui aktiviti penjagaan bersama.","questions":[{"id":15,"text":"Mengapakah pada mulanya Ibu keberatan untuk memelihara arnab?","options":{"A":"Ibu tidak suka haiwan peliharaan.","B":"Rumah sudah cukup meriah.","C":"Anak-anak tidak berjanji akan menjaga arnab.","D":"Ibu bimbang ia akan membebankan mereka."},"correct":"B","evidence":"F1 (Ibu): Abang masih ingatkah, pada mulanya saya agak keberatan apabila anak-anak minta kita memelihara arnab? Rumah kita sudah cukup meriah, rasanya."},{"id":16,"text":"Apakah aktiviti pertama yang dilakukan oleh keluarga untuk mengeratkan hubungan selepas memiliki arnab?","options":{"A":"Memilih nama yang sesuai untuk arnab.","B":"Membawa arnab ke klinik veterinar.","C":"Membina sangkar yang selesa untuk arnab.","D":"Membeli makanan dan aksesori arnab."},"correct":"C","evidence":"M1 (Ayah): Salah satu perkara pertama yang kami lakukan selepas membawa Arnab ke rumah ialah membuat rumahnya. Kami sekeluarga bekerjasama membina sangkar yang selesa untuknya di sudut laman."},{"id":17,"text":"Apakah tugas rutin penjagaan arnab yang paling ditekankan oleh Ayah sebagai aktiviti mengeratkan hubungan?","options":{"A":"Berebut-rebut untuk memberi makan.","B":"Membersihkan sangkar secara bergilir-gilir.","C":"Membeli makanan untuk Si Comel.","D":"Bermain-main dengan arnab setiap petang."},"correct":"B","evidence":"M1 (Ayah): Saya rasa, tugasan membersihkan sangkar adalah yang paling mereka tekuni secara bergilir-gilir setiap hujung minggu."},{"id":18,"text":"Bagaimanakah kehadiran arnab telah mengubah dinamik komunikasi keluarga?","options":{"A":"Anak-anak lebih gemar berbual dengan arnab berbanding sesama mereka.","B":"Ahli keluarga mula berdiam diri dan memerhati arnab.","C":"Mereka sering berbincang tentang arnab dan membuat keputusan bersama.","D":"Ibu bapa tidak lagi menegur anak-anak yang leka dengan gajet."},"correct":"C","evidence":"M1 (Ayah): Saya perhatikan, anak-anak jadi lebih banyak bercakap antara satu sama lain. Mereka berbincang tentang makanan apa yang paling Si Comel suka, atau cara untuk melatihnya. F1 (Ibu): Contohnya, apabila Si Comel sakit atau ada apa-apa perubahan pada tingkah lakunya, semua orang akan berkumpul dan berbincang apa yang terbaik untuknya. Ia meningkatkan interaksi sosial kami."},{"id":19,"text":"Apakah kesan utama kehadiran arnab terhadap keluarga mereka secara keseluruhan?","options":{"A":"Menambah beban kerja harian ibu bapa.","B":"Mengurangkan masa interaksi keluarga.","C":"Mengukuhkan hubungan kekeluargaan dan nilai murni.","D":"Menyebabkan anak-anak lebih fokus pada gajet peribadi."},"correct":"C","evidence":"F1 (Ibu): Secara keseluruhannya, kehadiran Si Comel ini bukan sekadar menambah ahli keluarga berbulu, tetapi juga mengukuhkan hubungan kami. M1 (Ayah): Saya rasa kami sekeluarga kini lebih dekat, lebih prihatin, dan lebih gembira. Ia mengajar anak-anak tentang empati, kasih sayang, dan kepentingan bekerjasama."}]},{"id":4,"title":"Bhg 4 (S20-28)","type":"objective","situation":"Ayah mengajar anak-anaknya tentang kepentingan menjaga kebersihan sangkar burung peliharaan secara berkala.","questions":[{"id":20,"text":"Apakah sebab utama menjaga kebersihan sangkar burung menurut Ayah?","options":{"A":"Supaya burung kelihatan lebih cantik.","B":"Untuk memastikan burung sentiasa sihat dan aktif.","C":"Bagi mengelakkan sangkar daripada berkarat.","D":"Agar rumah tidak berbau busuk."},"correct":"B","evidence":"M1 (Ayah): ...jika kotor, ia menjejaskan kesihatan Nuri. Kebersihan sangkar memastikan Nuri sentiasa sihat dan aktif."},{"id":21,"text":"Apakah dua kesan utama yang timbul akibat sangkar burung yang kotor?","options":{"A":"Penyakit dan bau busuk.","B":"Burung menjadi agresif dan gemuk.","C":"Bulu burung menjadi kusam dan gugur.","D":"Sangkar cepat rosak dan berhabuk."},"correct":"A","evidence":"M1 (Ayah): Sisa makanan, najis, dan bulu gugur boleh jadi tempat pembiakan kuman. Ini sebabkan Nuri mudah dijangkiti penyakit. ...Sangkar kotor juga mengeluarkan bau tidak menyenangkan. Jadi, kesihatan dan bau adalah dua kesan utamanya."},{"id":22,"text":"Berapa kerapkah pembersihan menyeluruh sangkar burung perlu dilakukan?","options":{"A":"Setiap hari.","B":"Dua kali seminggu.","C":"Sekali seminggu.","D":"Sebulan sekali."},"correct":"C","evidence":"M1 (Ayah): ...pembersihan menyeluruh seperti mencuci sangkar, sekurang-kurangnya sekali seminggu."},{"id":23,"text":"Apakah peralatan penting yang diperlukan untuk membersihkan sangkar burung secara menyeluruh?","options":{"A":"Berus, sabun pencuci, dan air bersih.","B":"Vakum, sabun pewangi, dan tuala.","C":"Sabun antiseptik, hos air, dan penyapu.","D":"Racun serangga, pengilat, dan span."},"correct":"A","evidence":"M1 (Ayah): Untuk pembersihan menyeluruh, kita perlukan berus menyental, sabun pencuci selamat untuk haiwan, dan air bersih."},{"id":24,"text":"Apakah tindakan yang perlu diambil terhadap burung peliharaan semasa sangkarnya dibersihkan?","options":{"A":"Membiarkannya terbang bebas di dalam rumah.","B":"Mengurungnya di dalam bilik mandi.","C":"Memindahkannya ke sangkar sementara.","D":"Memberinya makanan tambahan."},"correct":"C","evidence":"M1 (Ayah): ...pindahkan Nuri ke sangkar sementara atau tempat lain yang selamat."},{"id":25,"text":"Bahagian sangkar yang manakah perlu diberi perhatian khusus semasa pembersihan menyeluruh?","options":{"A":"Atap sangkar.","B":"Dinding sisi sangkar.","C":"Palang tempat bertenggek, bekas makanan dan minuman.","D":"Engsel pintu sangkar."},"correct":"C","evidence":"M1 (Ayah): ...jangan lupa palang tempat Nuri bertenggek, bekas makanan dan minuman. Di situ kuman merebak cepat jika tidak dibersihkan."},{"id":26,"text":"Selain kesihatan fizikal, apakah manfaat lain kebersihan sangkar kepada burung?","options":{"A":"Memastikan burung lebih jinak.","B":"Untuk kesejahteraan mental dan emosinya.","C":"Menggalakkan burung bertelur.","D":"Menjadikan burung lebih pandai bercakap."},"correct":"B","evidence":"M1 (Ayah): Sangkar bersih dan selesa buat Nuri gembira, tidak tertekan. Penting untuk kesejahteraan mentalnya. Burung gembira lebih aktif, ceria."},{"id":27,"text":"Siapakah yang bertanggungjawab menjaga kebersihan sangkar burung Nuri?","options":{"A":"Hanya Ayah sahaja.","B":"Hanya anak-anak sahaja.","C":"Semua ahli keluarga secara bersama.","D":"Orang gaji."},"correct":"C","evidence":"M1 (Ayah): Penjagaan haiwan adalah tanggungjawab bersama. Kita boleh buat jadual agar semua ahli keluarga terlibat."},{"id":28,"text":"Apakah kesan jangka panjang jika kebersihan sangkar burung sentiasa dijaga?","options":{"A":"Burung akan mempunyai warna bulu yang lebih terang.","B":"Burung akan membiak dengan lebih cepat.","C":"Burung akan hidup lebih lama dan sihat.","D":"Burung akan kurang bergantung kepada pemilik."},"correct":"C","evidence":"M1 (Ayah): Jika konsisten, Nuri akan hidup lebih lama dan sihat. Ia elak penyakit kronik, kekal cergas sampai tua."}]},{"id":5,"title":"Bhg 5 (S29-34)","type":"objective","situation":"Seluruh ahli keluarga berasa sedih apabila hamster kesayangan mereka jatuh sakit dan memerlukan rawatan veterinar.","questions":[{"id":29,"text":"Apakah tanda-tanda yang menunjukkan Miki tidak sihat?","options":{"A":"Tidak aktif, lesu, tidak makan, mata layu, bulu serabut.","B":"Banyak makan, aktif berlari, bulu kemas, mata bersinar.","C":"Sentiasa tidur, bulu gugur, agresif, makan sedikit.","D":"Minum banyak air, bunyi bising, sangkar kotor, badan panas."},"correct":"A","evidence":"Dia asyik terbaring saja, nampak lesu sangat. Makanan pun tak disentuh. Mata pun layu dan bulu serabut. Dia tak respon bila saya panggil."},{"id":30,"text":"Mengapakah Laila begitu risau tentang keadaan Miki?","options":{"A":"Bimbang kos rawatan tinggi dan tidak mampu ditanggung.","B":"Miki tidak makan, tidak aktif seperti biasa dan tidak responsif.","C":"Sangkar Miki kotor dan makanannya telah tamat tempoh.","D":"Miki mungkin telah dijangkiti penyakit dari hamster lain."},"correct":"B","evidence":"Tapi dia memang tak jamah apa-apa. Selalunya pagi dia dah aktif atas roda. Sekarang tak ada langsung."},{"id":31,"text":"Apakah tindakan segera yang perlu diambil untuk Miki?","options":{"A":"Mencari maklumat tentang makanan tambahan untuk hamster.","B":"Menghubungi rakan-rakan untuk meminta pendapat.","C":"Membiarkan Miki berehat dan berharap dia sembuh sendiri.","D":"Membawa Miki ke klinik veterinar secepat mungkin."},"correct":"D","evidence":"Kita kena bawa dia ke klinik veterinar secepat mungkin, Laila. Kita tak boleh biarkan dia macam ni."},{"id":32,"text":"Siapakah yang dijangka akan membawa Miki ke klinik veterinar?","options":{"A":"Laila","B":"Azri","C":"Ayah","D":"Ibu"},"correct":"C","evidence":"Ayah mungkin tahu klinik yang buka hari Ahad. [...] Nanti saya telefon Ayah dan terangkan situasinya."},{"id":33,"text":"Bagaimana kos rawatan Miki dijangka akan ditanggung?","options":{"A":"Ditanggung sepenuhnya oleh Azri seorang.","B":"Melalui sumbangan dari semua ahli keluarga.","C":"Pinjaman dari rakan-rakan keluarga.","D":"Menggunakan wang simpanan Ibu dan Ayah sahaja."},"correct":"B","evidence":"Kita semua boleh kumpul duit sikit. Saya ada duit simpanan hasil kerja sambilan. Ibu dan Ayah pasti bantu juga."},{"id":34,"text":"Mengapakah Miki sangat penting kepada keluarga Laila dan Azri?","options":{"A":"Miki merupakan hamster yang sangat mahal dan sukar ditemui.","B":"Miki memenangi banyak pertandingan haiwan peliharaan.","C":"Miki telah menjadi sebahagian daripada keluarga dan membawa kegembiraan.","D":"Miki adalah satu-satunya haiwan peliharaan yang mereka miliki."},"correct":"C","evidence":"Miki dah macam ahli keluarga, saya tak sanggup tengok dia menderita. [...] Dia selalu buat kita ketawa. [...] Hamster kecil itu dah bawa banyak kegembiraan dalam hidup kita sekeluarga. Semangat dia selalu menceriakan hari-hari kita."}]},{"id":6,"title":"Bhg 6 (S35-37)","type":"objective","situation":"Keluarga Encik Roger mengambil keputusan untuk membela seekor anak anjing dari pusat perlindungan haiwan tempatan.","questions":[{"id":35,"text":"Mengapakah keluarga Encik Roger membuat keputusan untuk mengambil anak anjing dari pusat perlindungan?","options":{"A":"Ingin menyertai pertandingan haiwan peliharaan.","B":"Untuk mencuba pengalaman memelihara haiwan buat kali pertama.","C":"Anak-anak mereka telah lama inginkan teman haiwan peliharaan.","D":"Pusat perlindungan haiwan memberikan diskaun istimewa.","E":"Mahu memberi peluang kepada haiwan terbiar untuk mendapatkan rumah."},"correct":["C","E"],"evidence":"M1 (Encik Roger): '...Banyak haiwan di sana perlukan rumah. Anak-anak pun dah lama mahukan teman.' F1 (Puan Maria): 'Memberi peluang kedua kepada haiwan terbiar itu mulia. Ini juga mengajar anak-anak kita tentang tanggungjawab dan kasih sayang.'"},{"id":36,"text":"Apakah persediaan yang telah dilakukan oleh keluarga Encik Roger sebelum membawa pulang anak anjing?","options":{"A":"Memasang pagar elektrik di sekeliling rumah untuk keselamatan.","B":"Menyediakan keperluan asas seperti sangkar, makanan, dan mainan.","C":"Memastikan keadaan rumah selamat dan sesuai untuk anak anjing.","D":"Membelikan pakaian dan aksesori fesyen untuk anak anjing.","E":"Mendaftarkan anak anjing ke kelas latihan kepatuhan."},"correct":["B","C"],"evidence":"F1 (Puan Maria): 'Kita pun dah siap sedia. Sangkar, makanan, mainan, semua sudah ada. Pagar rumah pun sudah kukuh untuk keselamatan.' M1 (Encik Roger): 'Proses adopsi lancar. Borang diisi, temuduga selesai. Kemudian, mereka buat lawatan rumah untuk pastikan sesuai.'"},{"id":37,"text":"Apakah kesan kehadiran anak anjing terhadap keluarga Encik Roger dan penjagaan berterusan yang diperlukan?","options":{"A":"Suasana rumah menjadi lebih meriah dan ceria dengan kehadiran Cici.","B":"Keluarga tidak lagi perlu membawa anak anjing berjalan-jalan kerana ia sudah terlatih.","C":"Keluarga perlu bersedia untuk cabaran melatih dan menjaga disiplin anak anjing.","D":"Anak anjing menyebabkan peningkatan kos sara hidup yang tidak dijangka.","E":"Anak anjing sering merosakkan perabot dan menyebabkan ketegangan keluarga."},"correct":["A","C"],"evidence":"M1 (Encik Roger): 'Cici cepat sesuaikan diri, rumah kita jadi lebih ceria. Walaupun kadang-kadang nakal, gigit selipar saya, itu biasa.' F1 (Puan Maria): 'Ya, kehadiran Cici memang meriahkan suasana. Kita kena sabar latih dia. Selain itu, pastikan makanan cukup, bawa jalan-jalan setiap petang untuk senaman.'"}]}];
+const reqPassword = "21";
+const gasAppUrl = "https://script.google.com/macros/s/AKfycbztb-uoLIo-DnUlVJxNDEZrlBqdr9T4YrhK4W3muNwgTtASHMHo2D6EZ8QhCj2oPPfH/exec";
+const topicName = "KELUARGA DAN HAIWAN PELIHARAAN";
+const moduleTitle = "Latihan Mendengar IGCSE (40 Marks)";
+const storageKey = "neil_quiz_" + btoa(encodeURIComponent(moduleTitle).replace(/%/g, "")).substring(0, 15);
+
+let cur = 0; 
+let ans = JSON.parse(localStorage.getItem(storageKey + "_ans") || "{}"); 
+let submitted = localStorage.getItem(storageKey + "_sub") === "true"; 
+let totalMarks = 0; let requiredAnswers = 0;
+
+let studentName = localStorage.getItem(storageKey + "_name") || "";
+let studentYear = localStorage.getItem(storageKey + "_year") || "";
+let studentLevel = localStorage.getItem(storageKey + "_level") || "";
+let studentTeacher = localStorage.getItem(storageKey + "_teacher") || "";
+
+sections.forEach(function(s) {
+    let isM = s.id === 6 && s.type === "objective";
+    (s.questions || []).forEach(function(q) { 
+        totalMarks += isM ? 2 : 1; 
+        requiredAnswers += isM ? 2 : 1; 
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (document.getElementById("total-display")) {
+        document.getElementById("total-display").innerText = totalMarks;
+    }
+});
+
+document.addEventListener("contextmenu", function(e) { e.preventDefault(); }); 
+document.addEventListener("visibilitychange", function() { 
+    if (!submitted && document.getElementById("welcome-modal") && document.getElementById("welcome-modal").classList.contains("hidden")) {
+        if (document.hidden && document.getElementById("app-body")) { document.getElementById("app-body").classList.add("blurred-security"); } 
+        else if (document.getElementById("app-body")) { document.getElementById("app-body").classList.remove("blurred-security"); }
+    }
+});
+document.addEventListener("keydown", function(e) { 
+    if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "s")) { 
+        e.preventDefault(); alert("Fungsi ini disekat."); 
+    } 
+});
+
+window.checkRegistration = function() {
+    if (studentName && studentYear && studentLevel && studentTeacher) {
+        if (document.getElementById("welcome-modal")) document.getElementById("welcome-modal").classList.add("hidden");
+        if (document.getElementById("main-content")) document.getElementById("main-content").classList.remove("hidden");
+        if (document.getElementById("display-student-name")) document.getElementById("display-student-name").innerText = studentName + " (Cikgu " + studentTeacher + " | Year " + studentYear + " - " + studentLevel + ")";
+        if(submitted) calculateScore();
+        renderTabs(); renderContent(); 
+    } else {
+        if (document.getElementById("welcome-modal")) document.getElementById("welcome-modal").classList.remove("hidden");
+        if (document.getElementById("main-content")) document.getElementById("main-content").classList.add("hidden");
+    }
+};
+
+window.startQuiz = function() {
+    const n = document.getElementById("student-name").value.trim();
+    const y = document.getElementById("student-year").value;
+    const l = document.getElementById("student-level").value;
+    const t = document.getElementById("student-teacher").value;
+    
+    if(n.length < 3) return alert("Sila masukkan nama penuh anda (minimum 3 huruf).");
+    if(!t) return alert("Sila pilih Guru anda.");
+    if(!y) return alert("Sila pilih Tahun (Year) anda.");
+    if(!l) return alert("Sila pilih Tahap Kelas anda.");
+    
+    studentName = n; studentYear = y; studentLevel = l; studentTeacher = t;
+    localStorage.setItem(storageKey + "_name", studentName);
+    localStorage.setItem(storageKey + "_year", studentYear);
+    localStorage.setItem(storageKey + "_level", studentLevel);
+    localStorage.setItem(storageKey + "_teacher", studentTeacher);
+    
+    checkRegistration();
+};
+
+function persistData() {
+    try {
+        localStorage.setItem(storageKey + "_ans", JSON.stringify(ans));
+        localStorage.setItem(storageKey + "_sub", submitted ? "true" : "false");
+    } catch(e) {}
+}
+
+function calculateScore() {
+    let score = 0;
+    sections.forEach(function(s) {
+        let isM = s.id === 6 && s.type === "objective";
+        (s.questions || []).forEach(function(q) {
+            if (s.type === "objective" || s.type === "picture") {
+                if (isM) { 
+                    let uAns = ans[q.id] || []; 
+                    (q.correct || []).forEach(function(c) { if(uAns.includes(c)) score++; }); 
+                } 
+                else { if(ans[q.id] === q.correct) score++; }
+            } else if (s.type === "cloze") {
+                let uAns = (ans[q.id] || "").toLowerCase().trim(); 
+                let cAns = (q.correct || "").toLowerCase().trim();
+                if(uAns !== "" && uAns === cAns) score++;
+            }
+        });
+    });
+    if (document.getElementById("score-display")) {
+        document.getElementById("score-display").innerText = score;
+    }
+    return score;
+}
+
+function renderTabs() {
+    let html = "";
+    sections.forEach(function(s, idx) {
+        let activeClass = cur === idx ? "bg-indigo-600 text-white shadow-md scale-[1.02]" : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50";
+        let ansCount = 0;
+        let targetCount = s.id === 6 && s.type === "objective" ? (s.questions ? s.questions.length * 2 : 0) : (s.questions ? s.questions.length : 0);
+        
+        if(s.questions) { 
+            s.questions.forEach(function(q) { 
+                if(ans[q.id]) { 
+                    if(Array.isArray(ans[q.id])) ansCount += ans[q.id].length; 
+                    else if(ans[q.id].trim() !== "") ansCount++; 
+                } 
+            }); 
+        }
+        let statusDot = (!submitted && ansCount > 0 && ansCount >= targetCount) ? "<span class='inline-block w-2 h-2 rounded-full bg-emerald-400 ml-2'></span>" : "";
+        html += "<button onclick='changeTab(" + idx + ")' class='px-5 py-3 rounded-2xl text-[10px] sm:text-xs font-black uppercase whitespace-nowrap transition-all " + activeClass + "'>" + escapeHTML(s.title) + statusDot + "</button>";
+    });
+    if (document.getElementById("tabs")) {
+        document.getElementById("tabs").innerHTML = html;
+    }
+}
+
+window.changeTab = function(idx) { cur = idx; renderTabs(); renderContent(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+window.saveOpt = function(id, v, isM) {
+    if(submitted) return;
+    if(isM) { 
+        if(!ans[id]) ans[id] = []; 
+        let idx = ans[id].indexOf(v); 
+        if(idx > -1) ans[id].splice(idx, 1); 
+        else if(ans[id].length < 2) ans[id].push(v); 
+    } 
+    else { ans[id] = v; }
+    persistData(); renderTabs(); renderContent();
+};
+
+window.saveText = function(id, val) {
+    if(submitted) return;
+    ans[id] = val; persistData(); renderTabs();
+};
+
+window.submitQuiz = function() {
+    let currentAnsCount = 0;
+    Object.values(ans).forEach(function(v) { 
+        if(Array.isArray(v)) currentAnsCount += v.length; 
+        else if(v.trim() !== "") currentAnsCount++; 
+    });
+    if(currentAnsCount < requiredAnswers) { 
+        if(!confirm("Awak belum menanda semua soalan. Teruskan hantar?")) return; 
+    }
+
+    if (reqPassword !== "") {
+        let userPwd = prompt("🛑 KATA LALUAN DIPERLUKAN\n\nSila masukkan kata laluan dari guru:");
+        if (userPwd === null) return; 
+        if (userPwd.trim() !== reqPassword) { alert("❌ Kata laluan salah!"); return; }
+    }
+    
+    const finalScore = calculateScore();
+    if (gasAppUrl && gasAppUrl.startsWith("http")) {
+        document.getElementById("submitting-overlay").classList.remove("hidden");
+        document.getElementById("submitting-overlay").classList.add("flex");
+        
+        const payload = {
+            topic: topicName,
+            name: studentName,
+            year: studentYear,
+            level: studentLevel,
+            teacher: studentTeacher,
+            score: finalScore,
+            total: totalMarks,
+            details: ans
+        };
+
+        fetch(gasAppUrl, { 
+            method: "POST", 
+            mode: "no-cors", 
+            headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+            body: JSON.stringify(payload) 
+        })
+        .then(function() { window.finalizeSubmission(); })
+        .catch(function(err) { alert("Ralat hantar ke database cikgu, tapi jawapan telah disimpan di peranti ini."); window.finalizeSubmission(); });
+    } else { window.finalizeSubmission(); }
+};
+
+window.finalizeSubmission = function() {
+    if (document.getElementById("submitting-overlay")) {
+        document.getElementById("submitting-overlay").classList.add("hidden");
+        document.getElementById("submitting-overlay").classList.remove("flex");
+    }
+    submitted = true; persistData(); calculateScore();
+    if (document.getElementById("app-body")) document.getElementById("app-body").classList.remove("blurred-security");
+    renderTabs(); renderContent(); window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+window.refreshPage = function() {
+    location.reload();
+};
+
+window.logoutUser = function() {
+    if(confirm("AMARAN: Anda pasti untuk log keluar? Semua jawapan akan dipadam!")) {
+        localStorage.removeItem(storageKey + "_ans"); localStorage.removeItem(storageKey + "_sub");
+        localStorage.removeItem(storageKey + "_name"); localStorage.removeItem(storageKey + "_year");
+        localStorage.removeItem(storageKey + "_level"); localStorage.removeItem(storageKey + "_teacher");
+        location.reload();
+    }
+};
+
+window.resetData = function() {
+    if(confirm("AWAS: Jawapan anda akan dipadam! Teruskan?")) {
+        localStorage.removeItem(storageKey + "_ans"); localStorage.removeItem(storageKey + "_sub");
+        localStorage.removeItem(storageKey + "_name"); localStorage.removeItem(storageKey + "_year");
+        localStorage.removeItem(storageKey + "_level"); localStorage.removeItem(storageKey + "_teacher");
+        location.reload();
+    }
+};
+
+function escapeHTML(str) {
+    if (!str) return "";
+    return String(str).replace(/[&<>'"]/g, function(tag) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag;
+    });
+}
+
+function renderContent() {
+    const s = sections[cur]; const b = document.getElementById("box");
+    if (!b) return;
+
+    const isMulti = s.id === 6 && s.type === "objective";
+    let h = '<div class="flex justify-between items-start mb-4"><h2 class="text-2xl font-black text-indigo-950 uppercase tracking-tight">' + escapeHTML(s.title) + '</h2></div>';
+    
+    if(s.situation) h += '<p class="text-sm font-medium text-slate-500 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">' + escapeHTML(s.situation) + '</p>';
+    if(isMulti && !submitted) h += '<div class="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 mb-6 rounded-r-xl font-bold text-sm">⚠️ PENTING: Anda perlu menanda DUA (2) jawapan untuk soalan di bahagian ini.</div>';
+    
+    if(s.audioUrl) {
+        h += '<div class="bg-indigo-50 p-4 rounded-3xl mb-8 border border-indigo-100 shadow-inner"><div class="text-[10px] font-black text-indigo-600 uppercase mb-2 pl-2">Rakaman Audio</div><audio controls class="w-full h-10" src="' + s.audioUrl + '"></audio></div>';
+    } else {
+        h += '<div class="bg-indigo-50 p-4 rounded-2xl mb-8 text-center text-[12px] font-black text-indigo-600 uppercase">Sila dengar audio dari guru.</div>';
+    }
+    
+    if(s.questions && s.questions.length > 0) {
+        s.questions.forEach(function(q) {
+            h += '<div class="mb-10">';
+            if (s.type === "picture") {
+                if (q.imageData) h += '<div class="w-full h-48 sm:h-64 mb-5 rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-white flex items-center justify-center p-2"><img src="' + q.imageData + '" class="max-w-full max-h-full object-contain rounded-xl"/></div>';
+                h += '<p class="font-bold text-slate-800 mb-5 text-lg"><span class="text-indigo-600 font-black mr-1">' + q.id + '.</span> ' + escapeHTML(q.text) + '</p><div class="grid gap-2">';
+                Object.keys(q.options || {}).sort().forEach(function(k) {
+                    let v = q.options[k];
+                    if(v && v.trim() !== "") {
+                        let isSelected = ans[q.id] === k; let isActuallyCorrect = q.correct === k; let cl = "opt-btn";
+                        if(submitted) { if(isActuallyCorrect) cl += " correct-answer"; else if (isSelected && !isActuallyCorrect) cl += " wrong-answer"; else cl += " dimmed-answer"; } 
+                        else if(isSelected) cl += " selected shadow-sm";
+                        let safeK = escapeHTML(k).replace(/'/g, "\\'");
+                        h += '<button onclick="saveOpt(' + q.id + ', \'' + safeK + '\', false)" class="' + cl + '" ' + (submitted ? 'disabled' : '') + '><span class="w-8 inline-block text-slate-400 font-black">' + k + '</span><span class="flex-1">' + escapeHTML(v) + '</span></button>';
+                    }
+                });
+                if(submitted && q.evidence) h += '<div class="mt-4 p-4 bg-amber-50 rounded-2xl text-xs font-bold text-amber-800 border border-amber-200">💡 Bukti: ' + escapeHTML(q.evidence) + '</div>';
+                h += '</div>';
+            } 
+            else if (s.type === "cloze") {
+                h += '<p class="font-bold text-slate-800 mb-3 text-lg"><span class="text-indigo-600 font-black mr-1">' + q.id + '.</span> ' + escapeHTML(q.text) + '</p>';
+                let uAns = ans[q.id] || ""; let isCorrect = false;
+                if (submitted) isCorrect = (uAns.toLowerCase().trim() === (q.correct || "").toLowerCase().trim());
+                let inputClass = "w-full p-3 rounded-xl border-2 font-bold outline-none transition-all ";
+                if (submitted) { if (isCorrect) inputClass += "border-emerald-500 bg-emerald-50 text-emerald-700"; else inputClass += "border-rose-500 bg-rose-50 text-rose-700 line-through-red"; } 
+                else { inputClass += "border-slate-200 focus:border-indigo-400 text-slate-800"; }
+                let safeAns = escapeHTML(uAns).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                h += '<input type="text" onkeyup="saveText(' + q.id + ', this.value)" onchange="saveText(' + q.id + ', this.value)" value="' + safeAns + '" placeholder="Taip jawapan..." class="' + inputClass + '" ' + (submitted ? 'disabled' : '') + '/>';
+                if(submitted) { if (isCorrect) h += '<div class="mt-2 text-xs font-black text-emerald-600 flex items-center gap-1">✅ Tepat!</div>'; else h += '<div class="mt-2 p-3 bg-rose-100 text-rose-800 rounded-xl border border-rose-200 text-xs font-bold">❌ Salah. Jawapan sebenar: <span class="text-rose-900 font-black">' + escapeHTML(q.correct) + '</span></div>'; }
+            } 
+            else {
+                h += '<p class="font-bold text-slate-800 mb-5 text-lg"><span class="text-indigo-600 font-black mr-1">' + q.id + '.</span> ' + escapeHTML(q.text) + '</p><div class="grid gap-2">';
+                Object.keys(q.options || {}).sort().forEach(function(k) {
+                    let v = q.options[k];
+                    if(v && v.trim() !== "") {
+                        let isSelected = isMulti ? (ans[q.id] || []).includes(k) : ans[q.id] === k; let isActuallyCorrect = isMulti ? (q.correct || []).includes(k) : q.correct === k; let cl = "opt-btn";
+                        if(submitted) { if(isActuallyCorrect) cl += " correct-answer"; else if (isSelected && !isActuallyCorrect) cl += " wrong-answer"; else cl += " dimmed-answer"; } 
+                        else if(isSelected) cl += " selected shadow-sm";
+                        let safeK = escapeHTML(k).replace(/'/g, "\\'");
+                        h += '<button onclick="saveOpt(' + q.id + ', \'' + safeK + '\', ' + isMulti + ')" class="' + cl + '" ' + (submitted ? 'disabled' : '') + '>';
+                        if (isMulti && !submitted) h += '<div class="w-6 h-6 mr-3 border-2 rounded flex items-center justify-center ' + (isSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-slate-300') + '">' + (isSelected ? '✓' : '') + '</div>'; else h += '<span class="w-8 inline-block text-slate-400 font-black">' + k + '</span>';
+                        h += '<span class="flex-1">' + escapeHTML(v) + '</span></button>';
+                    }
+                });
+                if(submitted && q.evidence) h += '<div class="mt-4 p-4 bg-amber-50 rounded-2xl text-xs font-bold text-amber-800 border border-amber-200">💡 Bukti: ' + escapeHTML(q.evidence) + '</div>';
+                h += '</div>';
+            }
+            h += '</div>';
+        });
+    } else { h += '<div class="text-center py-10 text-slate-400 font-bold uppercase text-xs">Tiada soalan.</div>'; }
+    
+    if(!submitted && cur === sections.length - 1) { h += '<button onclick="submitQuiz()" class="w-full bg-emerald-500 text-white py-5 rounded-[1.5rem] font-black text-lg uppercase shadow-xl transition-all hover:bg-emerald-600 hover:scale-[1.02] mt-6 border-b-4 border-emerald-700">HANTAR JAWAPAN</button>'; } 
+    else if (!submitted && cur < sections.length - 1) { h += '<button onclick="changeTab(' + (cur + 1) + ')" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black uppercase shadow-lg transition-all hover:bg-blue-600 mt-4 border-b-4 border-blue-700">Seterusnya: ' + escapeHTML(sections[cur+1].title) + '</button>'; } 
+    else if (submitted && cur === sections.length - 1) { h += '<div class="text-center p-8 bg-emerald-50 rounded-3xl border-2 border-emerald-200 mt-8 shadow-sm"><h3 class="text-2xl font-black text-emerald-600 uppercase mb-2">Tahniah! Ujian Tamat 🎉</h3><p class="text-sm text-emerald-800 font-medium">Anda mendapat skor <span class="font-black text-lg">' + (document.getElementById('score-display') ? document.getElementById('score-display').innerText : score) + ' / ' + totalMarks + '</span>.</p></div>'; }
+    
+    if (b) b.innerHTML = h;
+}
+
+window.onload = function() { checkRegistration(); };
+
+    </script>
+</body>
+</html>
